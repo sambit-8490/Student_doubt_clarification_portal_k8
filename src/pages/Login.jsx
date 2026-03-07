@@ -123,10 +123,7 @@ const Login = ({ setCurrentUser, users }) => {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-gray-700/50 border border-gray-600 rounded">
-          <p className="text-xs text-gray-400 mb-2">Demo Account:</p>
-          <p className="text-xs text-gray-300">admin@college.edu / admin123</p>
-        </div>
+        
       </div>
     </div>
   );
