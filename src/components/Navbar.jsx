@@ -14,7 +14,6 @@ const Navbar = ({ user }) => {
       <div>
         <h1 className="text-lg font-bold text-gray-800">Student Doubt System</h1>
       </div>
-      
       <div className="flex items-center gap-3">
         <div>
           <p className="text-sm font-medium text-gray-800">{user?.name}</p>
