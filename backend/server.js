@@ -5,7 +5,8 @@ const { initDB } = require('./db');
 
 const app = express();
 
-app.use(cors({ origin: ['http://localhost:5173', process.env.FRONTEND_URL], credentials: true }));
+const allowedOrigins = ['http://localhost:5173', 'https://student-doubt-clarification-portal.vercel.app', process.env.FRONTEND_URL].filter(Boolean);
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth'));
