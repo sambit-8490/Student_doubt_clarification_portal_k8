@@ -6,6 +6,8 @@ import BookAppointment from './pages/BookAppointment';
 import FacultyDashboard from './pages/FacultyDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import { api } from './services/api';
+import ArchitectureDiagram from './diagrams/ArchitectureDiagram';
+import ERDiagram from './diagrams/ERDiagram';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -87,6 +89,8 @@ function App() {
             : <Navigate to="/" replace />
         } />
 
+        <Route path="/diagram" element={<ArchitectureDiagram />} />
+        <Route path="/er-diagram" element={<ERDiagram />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
