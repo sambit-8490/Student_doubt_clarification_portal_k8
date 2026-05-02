@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { api } from '../services/api';
 
@@ -10,7 +10,9 @@ const roleColors = {
 
 const inputCls = "w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
 
-const AdminDashboard = ({ user, users, setUsers, onLogout }) => {
+const AdminDashboard = ({ user, onLogout }) => {
+  const [users, setUsers] = useState([]);
+  useEffect(() => { api.getUsers().then(setUsers).catch(console.error); }, []);
   const [activeTab, setActiveTab] = useState('users');
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', role: 'student', password: '', department: '' });
