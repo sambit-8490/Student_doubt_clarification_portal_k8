@@ -10,15 +10,19 @@ const Sidebar = ({ role }) => {
       case 'student':
         return [
           { path: '/student/dashboard', label: 'Dashboard' },
-          { path: '/student/book-appointment', label: 'Book Appointment' },
+          { path: '/community', label: '💬 Community Q&A' },
+          { path: '/chat', label: '✉️ Messages' },
         ];
       case 'faculty':
         return [
           { path: '/faculty/dashboard', label: 'Dashboard' },
+          { path: '/community', label: '💬 Community Q&A' },
+          { path: '/chat', label: '✉️ Messages' },
         ];
       case 'admin':
         return [
           { path: '/admin/dashboard', label: 'Dashboard' },
+          { path: '/community', label: '💬 Community Q&A' },
         ];
       default:
         return [];

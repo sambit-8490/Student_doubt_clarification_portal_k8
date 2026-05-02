@@ -7,12 +7,14 @@ import com.doubt.platform.model.User;
 import com.doubt.platform.repository.AppointmentRepository;
 import com.doubt.platform.repository.OfficeHourRepository;
 import com.doubt.platform.repository.UserRepository;
+import com.doubt.platform.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,18 +26,17 @@ public class AppointmentController {
     private final AppointmentRepository appointmentRepository;
     private final OfficeHourRepository officeHourRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @GetMapping
     public ResponseEntity<?> getAll(Authentication auth) {
         Long userId = (Long) auth.getPrincipal();
         String role = (String) auth.getCredentials();
-
         List<Appointment> list = switch (role) {
             case "student" -> appointmentRepository.findByStudentIdOrderByDateDesc(userId);
             case "faculty" -> appointmentRepository.findByFacultyIdOrderByDateDesc(userId);
             default -> appointmentRepository.findAllByOrderByDateDesc();
         };
-
         return ResponseEntity.ok(list.stream().map(this::toMap).toList());
     }
 
@@ -63,11 +64,17 @@ public class AppointmentController {
         a.setDate(slot.getDate());
         a.setTime(slot.getTime());
         a.setDoubt(req.getDoubt());
+        a.setTag(req.getTag());
 
         slot.setIsBooked(true);
         officeHourRepository.save(slot);
+        Appointment saved = appointmentRepository.save(a);
 
-        return ResponseEntity.status(201).body(toMap(appointmentRepository.save(a)));
+        // Notify faculty
+        notificationService.send(slot.getFacultyId(), "APPOINTMENT_BOOKED",
+            student.getName() + " booked an appointment on " + slot.getDate() + " at " + slot.getTime(), saved.getId());
+
+        return ResponseEntity.status(201).body(toMap(saved));
     }
 
     @PatchMapping("/{id}")
@@ -86,22 +93,40 @@ public class AppointmentController {
             return ResponseEntity.status(404).body(Map.of("message", "Appointment not found"));
 
         a.setStatus(req.getStatus());
+        if (req.getNotes() != null) a.setNotes(req.getNotes());
+
         if ("cancelled".equals(req.getStatus())) {
             officeHourRepository.findById(a.getOfficeHourId()).ifPresent(oh -> {
                 oh.setIsBooked(false);
                 officeHourRepository.save(oh);
             });
+            notificationService.send(a.getStudentId(), "CANCELLED",
+                "Your appointment with " + a.getFacultyName() + " on " + a.getDate() + " was cancelled.", id);
+        } else if ("approved".equals(req.getStatus())) {
+            notificationService.send(a.getStudentId(), "APPROVED",
+                "Your appointment with " + a.getFacultyName() + " on " + a.getDate() + " has been approved!", id);
+        } else if ("completed".equals(req.getStatus())) {
+            notificationService.send(a.getStudentId(), "COMPLETED",
+                "Your session with " + a.getFacultyName() + " is marked complete. Please rate the session.", id);
         }
 
         return ResponseEntity.ok(toMap(appointmentRepository.save(a)));
     }
 
     private Map<String, Object> toMap(Appointment a) {
-        return Map.of(
-                "id", a.getId(), "studentId", a.getStudentId(), "studentName", a.getStudentName(),
-                "facultyId", a.getFacultyId(), "facultyName", a.getFacultyName(),
-                "officeHourId", a.getOfficeHourId(), "date", a.getDate().toString(),
-                "time", a.getTime(), "doubt", a.getDoubt(), "status", a.getStatus()
-        );
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", a.getId());
+        m.put("studentId", a.getStudentId());
+        m.put("studentName", a.getStudentName());
+        m.put("facultyId", a.getFacultyId());
+        m.put("facultyName", a.getFacultyName());
+        m.put("officeHourId", a.getOfficeHourId());
+        m.put("date", a.getDate().toString());
+        m.put("time", a.getTime());
+        m.put("doubt", a.getDoubt());
+        m.put("status", a.getStatus());
+        m.put("tag", a.getTag() != null ? a.getTag() : "");
+        m.put("notes", a.getNotes() != null ? a.getNotes() : "");
+        return m;
     }
 }

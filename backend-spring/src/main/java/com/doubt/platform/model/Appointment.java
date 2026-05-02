@@ -36,8 +36,14 @@ public class Appointment {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String doubt;
 
+    @Column(length = 50)
+    private String tag; // DSA, DBMS, OS, Networks, Math, Other
+
     @Column(length = 20)
     private String status = "pending";
+
+    @Column(columnDefinition = "TEXT")
+    private String notes; // faculty session notes
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

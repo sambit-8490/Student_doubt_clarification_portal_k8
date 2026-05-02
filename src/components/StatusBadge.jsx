@@ -1,25 +1,18 @@
 import React from 'react';
 
-// Status badge component with color coding
-const StatusBadge = ({ status }) => {
-  const getStatusStyles = () => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-600 text-yellow-100';
-      case 'approved':
-        return 'bg-blue-600 text-blue-100';
-      case 'completed':
-        return 'bg-green-600 text-green-100';
-      case 'cancelled':
-        return 'bg-red-600 text-red-100';
-      default:
-        return 'bg-gray-600 text-gray-100';
-    }
-  };
+const config = {
+  pending:   { cls: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500' },
+  approved:  { cls: 'bg-blue-100 text-blue-800',    dot: 'bg-blue-500'   },
+  completed: { cls: 'bg-green-100 text-green-800',  dot: 'bg-green-500'  },
+  cancelled: { cls: 'bg-red-100 text-red-800',      dot: 'bg-red-500'    },
+};
 
+const StatusBadge = ({ status }) => {
+  const { cls, dot } = config[status] || config.pending;
   return (
-    <span className={`px-3 py-1 rounded text-xs font-semibold ${getStatusStyles()}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${cls}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+      {status}
     </span>
   );
 };
