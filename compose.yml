@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: doubt_platform_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: student_doubt_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d student_doubt_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend-spring
+      dockerfile: Dockerfile
+    container_name: doubt_platform_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/student_doubt_platform?ssl=false&sslmode=disable
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8085:8085"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: doubt_platform_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+
+volumes:
+  pgdata:
