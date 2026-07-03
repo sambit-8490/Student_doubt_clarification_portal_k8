@@ -6,7 +6,7 @@ data:
   DB_HOST: "postgres-service"
   DB_PORT: "5432"
   DB_NAME: "student_doubt_platform"
-  FRONTEND_URL: "http://192.168.49.2:30003"
+  FRONTEND_URL: "http://minikube-ip:30003"
   SERVER_PORT: "8085"
 ---
 apiVersion: v1
@@ -149,7 +149,7 @@ spec:
             - containerPort: 5173
           env:
             - name: VITE_API_URL
-              value: "http://192.168.49.2:30001/api"
+              value: "http://minikube-ip:30001/api"
 ---
 apiVersion: v1
 kind: Service
